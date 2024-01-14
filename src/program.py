@@ -2,10 +2,12 @@ from wordle_util import WordleSolver
 
 if __name__ == "__main__":
     ws = WordleSolver()
-    for i in range(0, 1):
-        answer = ws.choose_random_answer()
-        best_guesses = ws.find_best_guesses(answer)
-        print(f'\n***ANSWER****\n{answer}')
-        print('\n***BEST INITIAL GUESSES ***')
-        for guess in best_guesses:
-            print(f'{guess[0]}: {guess[1]}')
+
+    # Calculate and Store Initial Guess Scores
+    regenerate_initial_guesses = False
+    if regenerate_initial_guesses:
+        initial_scores = ws.find_best_initial_guesses_for_answer_count(5000)
+        ws.write_initial_guess_averages_to_file(initial_scores)
+
+    initials = ws.load_best_x_initial_guesses(10)
+    print(initials)

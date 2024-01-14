@@ -1,4 +1,5 @@
 import random
+import csv 
 
 class WordleSolver:
     valid_answers = []
@@ -13,7 +14,7 @@ class WordleSolver:
         with open('word_lists/valid_answers.txt', 'r') as file:
             for word in file.read().splitlines():
                 lines.append(word)
-                self.guessScores[word] = 0
+                self.guessScores[word] = []
         return lines
     
     def load_guesses(self):
@@ -21,7 +22,7 @@ class WordleSolver:
         with open('word_lists/valid_guesses.txt', 'r') as file:
             for word in file.read().splitlines():
                 lines.append(word)
-                self.guessScores[word] = 0
+                self.guessScores[word] = []
         return lines
 
     def check_valid_guess(self, guess):
@@ -39,9 +40,13 @@ class WordleSolver:
     def simulate_guesses(self, answer):
         guesses = {}
         for guess in self.valid_guesses:
+            score = self.calculate_guess_points(guess, answer)
+            self.guessScores[guess].append(score)
             guesses[guess] = self.calculate_guess_points(guess, answer)
         
         for guess in self.valid_answers:
+            score = self.calculate_guess_points(guess, answer)
+            self.guessScores[guess].append(score)
             guesses[guess] = self.calculate_guess_points(guess, answer)
 
         return guesses
@@ -63,7 +68,7 @@ class WordleSolver:
                 break
             for i in range(0, len(guess_chars)):
                 if guess_chars[i] == answer_chars[i]:
-                    score = score + 3
+                    score = score + 2
                     guess_chars.pop(i)
                     answer_chars.pop(i)
                     break
@@ -91,5 +96,45 @@ class WordleSolver:
         return score
     
     def find_best_initial_guesses_for_answer_count(self, count):
+        #print("\n*** ANSWERS ***")
+        print(f'\nSimulating inital guesses for {count} answers.')
+        print('************************************************\n')
         for i in range(0, count):
+            if (i + 1) % 100 == 0:
+                print(f'{i + 1} initial guess simulations completed.')
             answer = self.choose_random_answer()
+            #print(answer)
+            self.simulate_guesses(answer)
+
+        print("\n***********************************************\n")
+        
+        return self.calculate_and_sort_average_scores()
+
+    def calculate_and_sort_average_scores(self):
+        guessAverages = {}
+        for guess in self.guessScores:
+            totalScore = 0
+            for score in self.guessScores[guess]:
+                totalScore += score
+            guessAverages[guess] = totalScore / len(self.guessScores[guess])
+    
+        return sorted(guessAverages.items(), key=lambda x:x[1], reverse=True)
+    
+    def write_initial_guess_averages_to_file(self, averages):
+        with open('results/initial_guess_averages.csv', 'w') as f:
+            for guess in averages:
+                f.write(f'{guess[0]},{guess[1]}\n')
+
+    def load_best_x_initial_guesses(self, count):
+        initial_guesses = []
+        with open('results/initial_guess_averages.csv', 'r') as f:
+            reader = csv.reader(f)
+            counter = 0
+            for row in reader:
+                if counter > count:
+                    break
+                initial_guesses.append(row[0])
+                counter += 1
+
+        return initial_guesses
+    
