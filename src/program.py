@@ -9,5 +9,5 @@ if __name__ == "__main__":
         initial_scores = ws.find_best_initial_guesses_for_answer_count(5000)
         ws.write_initial_guess_averages_to_file(initial_scores)
 
-    initials = ws.load_best_x_initial_guesses(10)
-    print(initials)
+    answer = ws.choose_random_answer()
+    ws.play(answer)
