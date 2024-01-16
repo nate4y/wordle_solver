@@ -138,3 +138,101 @@ class WordleSolver:
 
         return initial_guesses
     
+    def generate_guess(self, green_letters, yellow_letters, gray_letters):
+        word_heirarchy = self.load_best_x_initial_guesses(10000)
+        if len(green_letters) == 0:
+            if len(yellow_letters) == 0:
+                if len(gray_letters) == 0:
+                    return self.load_best_x_initial_guesses(1)[0]
+                else:
+                    for word in word_heirarchy:
+                        valid = True
+                        for c in gray_letters:
+                            if c in word:
+                                valid = False
+                                break
+                        if valid:
+                            return word
+            else:
+                for word in word_heirarchy:
+                    valid = True
+                    for yc in yellow_letters:
+                        for gc in gray_letters:
+                            if yc not in word or gc in word:
+                                valid = False
+                                break
+                    if valid:
+                        return word
+        else:
+            for word in word_heirarchy:
+                valid = True
+                chars = [*word]
+
+                for g in green_letters:
+                    if chars[green_letters[g]] != g:
+                        valid = False
+                        break
+                    for yc in yellow_letters:
+                        if yc not in word:
+                            valid = False
+                            break
+                    for gc in gray_letters:
+                        if gc in word:
+                            valid = False
+                            break
+                if valid:
+                    return word
+                
+    def calculate_greens(self, guess, answer):
+        green_letters = {}
+        for i in range(0, len(guess)):
+            if guess[i] == answer[i]:
+                green_letters[guess[i]] = i
+        return green_letters
+    
+    def calculate_yellows(self, guess, answer):
+        yellow_letters = []
+        for i in range(0, len(guess)):
+            if guess[i] in answer and guess[i] != answer[i]:
+                yellow_letters.append(guess[i])
+        return yellow_letters
+    
+    def calculate_gray(self, guess, answer):
+        gray_letters = []
+        for c in guess:
+            if c not in answer:
+                gray_letters.append(c)
+        return gray_letters
+                
+    def play(self, answer):
+        guessCount = 0
+        guess = random.choice(self.load_best_x_initial_guesses(5))
+        print(f'ANSWER: {answer}\n')
+        gray = []
+        while guess != answer and guessCount < 50:
+            print(guess)
+
+            green = self.calculate_greens(guess, answer)
+            print(f'Green: {green}')
+
+            yellow = self.calculate_yellows(guess, answer)
+            print(f'Yellow: {yellow}')
+
+            gray.extend(self.calculate_gray(guess, answer))
+            print(f'Gray: {gray}')
+
+
+            guess = self.generate_guess(green, yellow, gray)
+            guessCount += 1
+            print('\n')
+        
+        green = self.calculate_greens(guess, answer)
+        print(f'Green: {green}')
+
+        yellow = self.calculate_yellows(guess, answer)
+        print(f'Yellow: {yellow}')
+
+        gray.extend(self.calculate_gray(guess, answer))
+        print(f'Gray: {gray}')
+
+        print(f'\nGuessed {guess} in {guessCount + 1} guesses')
