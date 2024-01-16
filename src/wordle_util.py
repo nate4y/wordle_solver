@@ -206,7 +206,7 @@ class WordleSolver:
                 
     def play(self, answer):
         guessCount = 0
-        guess = random.choice(self.load_best_x_initial_guesses(10))
+        guess = random.choice(self.load_best_x_initial_guesses(5))
         print(f'ANSWER: {answer}\n')
         gray = []
         while guess != answer and guessCount < 50:
@@ -225,7 +225,7 @@ class WordleSolver:
             guess = self.generate_guess(green, yellow, gray)
             guessCount += 1
             print('\n')
-        print(f'Guessed {guess} in {guessCount + 1} guesses')
+        
         green = self.calculate_greens(guess, answer)
         print(f'Green: {green}')
 
@@ -234,3 +234,5 @@ class WordleSolver:
 
         gray.extend(self.calculate_gray(guess, answer))
         print(f'Gray: {gray}')
+
+        print(f'\nGuessed {guess} in {guessCount + 1} guesses')
